@@ -1,0 +1,224 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Production builds
+.next/
+out/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Laravel specific
+# Application key
+.env
+
+# Laravel storage and cache
+backend/storage/
+backend/bootstrap/cache/
+
+# Keep .gitignore files in storage directories
+!backend/storage/app/.gitignore
+!backend/storage/framework/.gitignore
+!backend/storage/framework/cache/.gitignore
+!backend/storage/framework/sessions/.gitignore
+!backend/storage/framework/views/.gitignore
+!backend/storage/framework/testing/.gitignore
+!backend/storage/logs/.gitignore
+!backend/bootstrap/cache/.gitignore
+
+# Database
+backend/database/*.sqlite
+backend/database/*.sqlite3
+backend/database/*.db
+
+# Composer
+backend/composer.phar
+backend/vendor/
+
+# PHP
+backend/.phpunit.result.cache
+backend/phpunit.xml.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+backend/coverage/
+backend/.phpunit.cache/
+
+# Application specific
+# Keep database migrations and seeders
+!backend/database/migrations/
+!backend/database/seeders/
+!backend/database/factories/
+
+# Keep config files
+!backend/config/
+
+# Keep routes
+!backend/routes/
+
+# Keep app directory
+!backend/app/
+
+# Keep resources
+!backend/resources/
+
+# Keep tests
+!backend/tests/
+
+# Keep public assets
+!backend/public/
+
+# Keep artisan file
+!backend/artisan
+
+# Keep composer files
+!backend/composer.json
+!backend/composer.lock
+
+# Keep package files
+!backend/package.json
+!backend/package-lock.json
+
+# Keep configuration files
+!backend/.env.example
+!backend/.editorconfig
+!backend/.gitattributes
+!backend/phpunit.xml
+!backend/vite.config.js
+!backend/README.md
+
+# Frontend specific
+# Keep source files
+!app/
+!components/
+!hooks/
+!lib/
+!styles/
+!public/
+
+# Keep configuration files
+!next.config.mjs
+!postcss.config.mjs
+!tailwind.config.ts
+!tsconfig.json
+!next-env.d.ts
+!package.json
+!pnpm-lock.yaml
+!components.json
+
+# Keep .gitignore
+!.gitignore
