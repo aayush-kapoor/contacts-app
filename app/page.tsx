@@ -1,15 +1,68 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronRight, Users, Plus, Search, Edit, Trash2, History } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { ChevronRight, Users, Plus, Search, Edit, Trash2, History, Clock } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import ContactsList from "./contacts/page"
 import ContactForm from "./contacts/form"
 import ContactHistory from "./contacts/history"
 
+interface LatestHistoryEntry {
+  id: number
+  created_at: string
+  action: string
+  contact: {
+    first_name: string
+    last_name: string
+  }
+}
+
 export default function ContactsApp() {
   const [activeSection, setActiveSection] = useState("contacts")
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [latestUpdate, setLatestUpdate] = useState<string>("")
+  const [loading, setLoading] = useState(true)
+
+  // Fetch the latest history entry
+  const fetchLatestUpdate = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/contact-histories?per_page=1')
+      const data = await response.json()
+      
+      if (data.success && data.data.length > 0) {
+        const latestEntry: LatestHistoryEntry = data.data[0]
+        const date = new Date(latestEntry.created_at)
+        
+        // Format as MM/DD/YYYY HH:MM
+        const formattedDate = date.toLocaleDateString('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric'
+        })
+        const formattedTime = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        })
+        
+        setLatestUpdate(`${formattedDate} ${formattedTime}`)
+      } else {
+        setLatestUpdate("NO UPDATES")
+      }
+    } catch (error) {
+      setLatestUpdate("ERROR")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchLatestUpdate()
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchLatestUpdate, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="flex h-screen">
@@ -72,7 +125,13 @@ export default function ContactsApp() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-xs text-neutral-500">LAST UPDATE: REAL-TIME</div>
+            <div className="flex items-center gap-2 text-xs text-neutral-500">
+              {loading ? (
+                <span>LOADING...</span>
+              ) : (
+                <span>LAST UPDATE: {latestUpdate}</span>
+              )}
+            </div>
           </div>
         </div>
 

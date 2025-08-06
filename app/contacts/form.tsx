@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { User, Mail, Phone, Save, X } from 'lucide-react'
+import { User, Mail, Phone, Save, X, CheckCircle, AlertCircle } from 'lucide-react'
+
+interface FormErrors {
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+}
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -15,18 +22,25 @@ export default function ContactForm() {
     phone: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [successMessage, setSuccessMessage] = useState("")
+  const [apiErrors, setApiErrors] = useState("")
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
-    if (errors[field]) {
+    if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: "" }))
+    }
+    // Clear success/error messages when user starts typing
+    if (successMessage || apiErrors) {
+      setSuccessMessage("")
+      setApiErrors("")
     }
   }
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors: FormErrors = {}
     
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required"
@@ -47,7 +61,7 @@ export default function ContactForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!validateForm()) {
@@ -55,20 +69,52 @@ export default function ContactForm() {
     }
 
     setIsSubmitting(true)
+    setApiErrors("")
+    setSuccessMessage("")
     
-    // Simulate the 20-second delay as specified
-    setTimeout(() => {
-      console.log("Contact created:", formData)
-      setIsSubmitting(false)
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
+    try {
+      const response = await fetch('http://localhost:8000/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+        }),
       })
-      // Show success message (will implement later)
-    }, 20000)
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSuccessMessage("Contact created successfully!")
+        // Reset form
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+        })
+        setErrors({})
+      } else {
+        // Handle validation errors from API
+        if (data.errors) {
+          const apiErrors: FormErrors = {}
+          Object.keys(data.errors).forEach(key => {
+            apiErrors[key as keyof FormErrors] = data.errors[key][0]
+          })
+          setErrors(apiErrors)
+        } else {
+          setApiErrors(data.message || "Failed to create contact")
+        }
+      }
+    } catch (error) {
+      setApiErrors("Network error. Please check your connection.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleReset = () => {
@@ -79,6 +125,8 @@ export default function ContactForm() {
       phone: "",
     })
     setErrors({})
+    setSuccessMessage("")
+    setApiErrors("")
   }
 
   return (
@@ -90,6 +138,32 @@ export default function ContactForm() {
           <p className="text-sm text-neutral-400">Create a new contact entry in the database</p>
         </div>
       </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="p-4 bg-green-500/20 border border-green-500 rounded">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <div>
+              <p className="text-sm text-green-500 font-medium">SUCCESS!</p>
+              <p className="text-xs text-neutral-400">{successMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* API Error Message */}
+      {apiErrors && (
+        <div className="p-4 bg-red-500/20 border border-red-500 rounded">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <div>
+              <p className="text-sm text-red-500 font-medium">ERROR</p>
+              <p className="text-xs text-neutral-400">{apiErrors}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <div className="max-w-2xl">
@@ -194,7 +268,10 @@ export default function ContactForm() {
                     <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                     <div>
                       <p className="text-sm text-orange-500 font-medium">CREATING CONTACT...</p>
-                      <p className="text-xs text-neutral-400">This operation takes 20 seconds to complete</p>
+                      {/* <p className="text-xs text-neutral-400">This operation takes 20 seconds to complete</p>
+                      <div className="mt-2 w-full bg-neutral-800 rounded-full h-1">
+                        <div className="bg-orange-500 h-1 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

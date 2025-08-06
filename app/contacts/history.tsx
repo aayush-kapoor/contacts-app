@@ -1,65 +1,70 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, History, User, Edit, Plus, Trash2, Clock } from 'lucide-react'
+import { Search, History, User, Edit, Plus, Trash2, Clock, AlertCircle, Loader2 } from 'lucide-react'
+
+interface ContactHistory {
+  id: number
+  contact_id: number
+  contact: {
+    first_name: string
+    last_name: string
+  }
+  action: string
+  field: string | null
+  old_value: string | null
+  new_value: string | null
+  timestamp: string
+  user_id: string
+  created_at: string
+}
+
+interface ApiResponse {
+  success: boolean
+  data: ContactHistory[]
+  pagination?: {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+  }
+}
 
 export default function ContactHistory() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedHistory, setSelectedHistory] = useState(null)
+  const [selectedHistory, setSelectedHistory] = useState<ContactHistory | null>(null)
+  const [historyEntries, setHistoryEntries] = useState<ContactHistory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  // Mock data - will be replaced with API calls
-  const historyEntries = [
-    {
-      id: 1,
-      contactId: 1,
-      contactName: "John Doe",
-      action: "created",
-      field: null,
-      oldValue: null,
-      newValue: null,
-      timestamp: "2025-01-06 14:30:00",
-      userId: "system",
-    },
-    {
-      id: 2,
-      contactId: 1,
-      contactName: "John Doe",
-      action: "updated",
-      field: "phone",
-      oldValue: "+1-555-0122",
-      newValue: "+1-555-0123",
-      timestamp: "2025-01-06 15:45:00",
-      userId: "admin",
-    },
-    {
-      id: 3,
-      contactId: 2,
-      contactName: "Jane Smith",
-      action: "created",
-      field: null,
-      oldValue: null,
-      newValue: null,
-      timestamp: "2025-01-05 09:15:00",
-      userId: "system",
-    },
-    {
-      id: 4,
-      contactId: 2,
-      contactName: "Jane Smith",
-      action: "updated",
-      field: "email",
-      oldValue: "j.smith@example.com",
-      newValue: "jane.smith@example.com",
-      timestamp: "2025-01-06 11:20:00",
-      userId: "admin",
-    },
-  ]
+  // Fetch history from API
+  const fetchHistory = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('http://localhost:8000/api/contact-histories')
+      const data: ApiResponse = await response.json()
+      
+      if (data.success) {
+        setHistoryEntries(data.data)
+      } else {
+        setError("Failed to fetch history")
+      }
+    } catch (error) {
+      setError("Network error. Please check your connection.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const getActionColor = (action) => {
+  useEffect(() => {
+    fetchHistory()
+  }, [])
+
+  const getActionColor = (action: string) => {
     switch (action) {
       case "created":
         return "bg-white/20 text-white"
@@ -72,7 +77,7 @@ export default function ContactHistory() {
     }
   }
 
-  const getActionIcon = (action) => {
+  const getActionIcon = (action: string) => {
     switch (action) {
       case "created":
         return <Plus className="w-4 h-4" />
@@ -87,10 +92,23 @@ export default function ContactHistory() {
 
   const filteredHistory = historyEntries.filter(
     (entry) =>
-      entry.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${entry.contact.first_name} ${entry.contact.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (entry.field && entry.field.toLowerCase().includes(searchTerm.toLowerCase())),
   )
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+            <span className="text-white">Loading history...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -102,6 +120,18 @@ export default function ContactHistory() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 bg-red-500/20 border border-red-500 rounded">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <div>
+              <p className="text-sm text-red-500 font-medium">ERROR</p>
+              <p className="text-xs text-neutral-400">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* History Timeline */}
       <Card className="bg-neutral-900 border-neutral-700">
@@ -126,7 +156,9 @@ export default function ContactHistory() {
                         <Badge className={getActionColor(entry.action)}>
                           {entry.action.toUpperCase()}
                         </Badge>
-                        <span className="text-sm text-white font-medium">{entry.contactName}</span>
+                        <span className="text-sm text-white font-medium">
+                          {entry.contact.first_name} {entry.contact.last_name}
+                        </span>
                       </div>
                       
                       {entry.action === "created" ? (
@@ -137,11 +169,11 @@ export default function ContactHistory() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                             <div>
                               <span className="text-neutral-400">Old value:</span>
-                              <span className="text-red-400 font-mono ml-2">{entry.oldValue}</span>
+                              <span className="text-red-400 font-mono ml-2">{entry.old_value}</span>
                             </div>
                             <div>
                               <span className="text-neutral-400">New value:</span>
-                              <span className="text-white font-mono ml-2">{entry.newValue}</span>
+                              <span className="text-white font-mono ml-2">{entry.new_value}</span>
                             </div>
                           </div>
                         </div>
@@ -152,18 +184,32 @@ export default function ContactHistory() {
                   </div>
 
                   <div className="text-right text-xs text-neutral-400 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3 h-3" />
-                      <span className="font-mono">{entry.timestamp}</span>
-                    </div>
+                                          <div className="flex items-center gap-2">
+                        <Clock className="w-3 h-3" />
+                        <span className="font-mono">{new Date(entry.created_at).toLocaleDateString('en-US', {
+                          month: '2-digit',
+                          day: '2-digit',
+                          year: 'numeric'
+                        })} {new Date(entry.created_at).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}</span>
+                      </div>
                     <div className="flex items-center gap-2">
                       <User className="w-3 h-3" />
-                      <span className="font-mono">{entry.userId}</span>
+                      <span className="font-mono">{entry.user_id}</span>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+            
+            {filteredHistory.length === 0 && !loading && (
+              <div className="text-center py-8">
+                <p className="text-neutral-400">No history entries found</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -189,7 +235,9 @@ export default function ContactHistory() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">CONTACT</p>
-                  <p className="text-sm text-white">{selectedHistory.contactName}</p>
+                  <p className="text-sm text-white">
+                    {selectedHistory.contact.first_name} {selectedHistory.contact.last_name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">ACTION</p>
@@ -199,11 +247,21 @@ export default function ContactHistory() {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">TIMESTAMP</p>
-                  <p className="text-sm text-white font-mono">{selectedHistory.timestamp}</p>
+                  <p className="text-sm text-white font-mono">
+                    {new Date(selectedHistory.created_at).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    })} {new Date(selectedHistory.created_at).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">USER</p>
-                  <p className="text-sm text-white font-mono">{selectedHistory.userId}</p>
+                  <p className="text-sm text-white font-mono">{selectedHistory.user_id}</p>
                 </div>
               </div>
 
@@ -216,13 +274,13 @@ export default function ContactHistory() {
                     <div>
                       <p className="text-xs text-neutral-400 tracking-wider mb-1">OLD VALUE</p>
                       <p className="text-sm text-red-400 font-mono bg-neutral-800 p-2 rounded">
-                        {selectedHistory.oldValue}
+                        {selectedHistory.old_value}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-neutral-400 tracking-wider mb-1">NEW VALUE</p>
                       <p className="text-sm text-white font-mono bg-neutral-800 p-2 rounded">
-                        {selectedHistory.newValue}
+                        {selectedHistory.new_value}
                       </p>
                     </div>
                   </div>

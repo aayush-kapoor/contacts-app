@@ -1,44 +1,121 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal } from 'lucide-react'
+import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2 } from 'lucide-react'
+
+interface Contact {
+  id: number
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  created_at: string
+  updated_at: string
+}
+
+interface ApiResponse {
+  success: boolean
+  data: Contact[]
+  pagination?: {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+  }
+}
 
 export default function ContactsList() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedContact, setSelectedContact] = useState(null)
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [stats, setStats] = useState({
+    total_contacts: 0,
+    recent_updates: 0,
+    system_status: "ONLINE"
+  })
 
-  // Mock data - will be replaced with API calls
-  const contacts = [
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      phone: "+1-555-0123",
-      createdAt: "2025-01-06",
-      updatedAt: "2025-01-06",
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@example.com",
-      phone: "+1-555-0124",
-      createdAt: "2025-01-05",
-      updatedAt: "2025-01-06",
-    },
-  ]
+  // Fetch contacts from API
+  const fetchContacts = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('http://localhost:8000/api/contacts')
+      const data: ApiResponse = await response.json()
+      
+      if (data.success) {
+        setContacts(data.data)
+      } else {
+        setError("Failed to fetch contacts")
+      }
+    } catch (error) {
+      setError("Network error. Please check your connection.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch stats from API
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/contacts/stats')
+      const data = await response.json()
+      
+      if (data.success) {
+        setStats(data.data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats:", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchContacts()
+    fetchStats()
+  }, [])
 
   const filteredContacts = contacts.filter(
     (contact) =>
-      contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contact.email.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const handleDeleteContact = async (contactId: number) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/contacts/${contactId}`, {
+        method: 'DELETE',
+      })
+      
+      if (response.ok) {
+        // Refresh contacts list
+        fetchContacts()
+        fetchStats()
+        setSelectedContact(null)
+      } else {
+        setError("Failed to delete contact")
+      }
+    } catch (error) {
+      setError("Network error. Please check your connection.")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+            <span className="text-white">Loading contacts...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -55,6 +132,19 @@ export default function ContactsList() {
           </Button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 bg-red-500/20 border border-red-500 rounded">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <div>
+              <p className="text-sm text-red-500 font-medium">ERROR</p>
+              <p className="text-xs text-neutral-400">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search and Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -77,7 +167,7 @@ export default function ContactsList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-neutral-400 tracking-wider">TOTAL CONTACTS</p>
-                <p className="text-2xl font-bold text-white font-mono">{contacts.length}</p>
+                <p className="text-2xl font-bold text-white font-mono">{stats.total_contacts}</p>
               </div>
               <User className="w-8 h-8 text-white" />
             </div>
@@ -89,7 +179,7 @@ export default function ContactsList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-neutral-400 tracking-wider">RECENT UPDATES</p>
-                <p className="text-2xl font-bold text-orange-500 font-mono">2</p>
+                <p className="text-2xl font-bold text-orange-500 font-mono">{stats.recent_updates}</p>
               </div>
               <Edit className="w-8 h-8 text-orange-500" />
             </div>
@@ -101,7 +191,7 @@ export default function ContactsList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-neutral-400 tracking-wider">SYSTEM STATUS</p>
-                <p className="text-2xl font-bold text-white font-mono">ONLINE</p>
+                <p className="text-2xl font-bold text-white font-mono">{stats.system_status}</p>
               </div>
               <div className="w-8 h-8 flex items-center justify-center">
                 <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
@@ -142,12 +232,12 @@ export default function ContactsList() {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
                           <span className="text-xs font-bold text-white">
-                            {contact.firstName[0]}{contact.lastName[0]}
+                            {contact.first_name[0]}{contact.last_name[0]}
                           </span>
                         </div>
                         <div>
                           <div className="text-sm text-white font-medium">
-                            {contact.firstName} {contact.lastName}
+                            {contact.first_name} {contact.last_name}
                           </div>
                         </div>
                       </div>
@@ -164,14 +254,42 @@ export default function ContactsList() {
                         <span className="text-sm text-neutral-300 font-mono">{contact.phone}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">{contact.createdAt}</td>
-                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">{contact.updatedAt}</td>
+                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">
+                      {new Date(contact.created_at).toLocaleDateString('en-US', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        year: 'numeric'
+                      })} {new Date(contact.created_at).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">
+                      {new Date(contact.updated_at).toLocaleDateString('en-US', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        year: 'numeric'
+                      })} {new Date(contact.updated_at).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-red-500">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-neutral-400 hover:text-red-500"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteContact(contact.id)
+                          }}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
@@ -184,6 +302,12 @@ export default function ContactsList() {
               </tbody>
             </table>
           </div>
+          
+          {filteredContacts.length === 0 && !loading && (
+            <div className="text-center py-8">
+              <p className="text-neutral-400">No contacts found</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -194,7 +318,7 @@ export default function ContactsList() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold text-white tracking-wider">
-                  {selectedContact.firstName} {selectedContact.lastName}
+                  {selectedContact.first_name} {selectedContact.last_name}
                 </CardTitle>
                 <p className="text-sm text-neutral-400 font-mono">ID: {selectedContact.id}</p>
               </div>
@@ -224,11 +348,31 @@ export default function ContactsList() {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">CREATED</p>
-                  <p className="text-sm text-white font-mono">{selectedContact.createdAt}</p>
+                  <p className="text-sm text-white font-mono">
+                    {new Date(selectedContact.created_at).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    })} {new Date(selectedContact.created_at).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 tracking-wider mb-1">LAST UPDATED</p>
-                  <p className="text-sm text-white font-mono">{selectedContact.updatedAt}</p>
+                  <p className="text-sm text-white font-mono">
+                    {new Date(selectedContact.updated_at).toLocaleDateString('en-US', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: 'numeric'
+                    })} {new Date(selectedContact.updated_at).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
@@ -245,6 +389,7 @@ export default function ContactsList() {
                 <Button
                   variant="outline"
                   className="border-red-700 text-red-400 hover:bg-red-800 hover:text-red-300 bg-transparent"
+                  onClick={() => handleDeleteContact(selectedContact.id)}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
