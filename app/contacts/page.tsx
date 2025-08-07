@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2, X } from 'lucide-react'
+import { Label } from "@/components/ui/label"
+import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2, X, CheckCircle, Clock, Plus } from 'lucide-react'
 
 interface Contact {
   id: number
@@ -39,6 +40,22 @@ export default function ContactsList() {
     recent_updates: 0,
     system_status: "ONLINE"
   })
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingContact, setEditingContact] = useState<Contact | null>(null)
+  const [editFormData, setEditFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: ""
+  })
+  const [editErrors, setEditErrors] = useState<{[key: string]: string}>({})
+  const [editSuccessMessage, setEditSuccessMessage] = useState("")
+  const [editApiErrors, setEditApiErrors] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const [contactHistory, setContactHistory] = useState<any[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState("")
 
   // Fetch contacts from API
   const fetchContacts = async () => {
@@ -109,6 +126,143 @@ export default function ContactsList() {
       }
     } catch (error) {
       setError("Network error. Please check your connection.")
+    }
+  }
+
+  const handleViewHistory = async (contact: Contact) => {
+    setHistoryModalOpen(true)
+    setHistoryLoading(true)
+    setHistoryError("")
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/contacts/${contact.id}/history`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setContactHistory(data.data.histories || [])
+      } else {
+        setHistoryError("Failed to fetch contact history")
+      }
+    } catch (error) {
+      setHistoryError("Network error. Please check your connection.")
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  const handleEditContact = (contact: Contact) => {
+    setEditingContact(contact)
+    setEditFormData({
+      firstName: contact.first_name,
+      lastName: contact.last_name,
+      email: contact.email,
+      phone: contact.phone
+    })
+    setEditErrors({})
+    setEditSuccessMessage("")
+    setEditApiErrors("")
+    setEditModalOpen(true)
+  }
+
+  const handleEditInputChange = (field: string, value: string) => {
+    setEditFormData(prev => ({ ...prev, [field]: value }))
+    // Clear errors when user starts typing
+    if (editErrors[field]) {
+      setEditErrors(prev => ({ ...prev, [field]: "" }))
+    }
+    if (editSuccessMessage) {
+      setEditSuccessMessage("")
+    }
+    if (editApiErrors) {
+      setEditApiErrors("")
+    }
+  }
+
+  const validateEditForm = () => {
+    const newErrors: {[key: string]: string} = {}
+    
+    if (!editFormData.firstName.trim()) {
+      newErrors.firstName = "First name is required"
+    }
+    if (!editFormData.lastName.trim()) {
+      newErrors.lastName = "Last name is required"
+    }
+    if (!editFormData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/\S+@\S+\.\S+/.test(editFormData.email)) {
+      newErrors.email = "Email format is invalid"
+    }
+    if (!editFormData.phone.trim()) {
+      newErrors.phone = "Phone number is required"
+    } else if (!/^\d{8,10}$/.test(editFormData.phone.replace(/[\s\-\(\)\+]/g, ''))) {
+      newErrors.phone = "Phone number must be 8-10 digits"
+    }
+
+    setEditErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateEditForm() || !editingContact) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setEditApiErrors("")
+    setEditSuccessMessage("")
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/contacts/${editingContact.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: editFormData.firstName,
+          last_name: editFormData.lastName,
+          email: editFormData.email,
+          phone: editFormData.phone,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setEditSuccessMessage("Contact updated successfully!")
+        // Refresh contacts list
+        fetchContacts()
+        fetchStats()
+        // Close modal after a short delay
+        setTimeout(() => {
+          setEditModalOpen(false)
+          setEditingContact(null)
+          setEditFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: ""
+          })
+          setEditErrors({})
+          setEditSuccessMessage("")
+        }, 1500)
+      } else {
+        // Handle validation errors from API
+        if (data.errors) {
+          const apiErrors: {[key: string]: string} = {}
+          Object.keys(data.errors).forEach(key => {
+            apiErrors[key] = data.errors[key][0]
+          })
+          setEditErrors(apiErrors)
+        } else {
+          setEditApiErrors(data.message || "Failed to update contact")
+        }
+      }
+    } catch (error) {
+      setEditApiErrors("Network error. Please check your connection.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -289,7 +443,15 @@ export default function ContactsList() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-300/0 h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-300/0 h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditContact(contact)
+                          }}
+                        >
                           <Edit className="w-3 h-3" />
                         </Button>
                         <Button 
@@ -321,8 +483,14 @@ export default function ContactsList() {
 
       {/* Contact Detail Modal */}
       {selectedContact && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="bg-neutral-900 border-neutral-700/0 w-full max-w-2xl">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setSelectedContact(null)}
+        >
+          <Card 
+            className="bg-neutral-900 border-neutral-700/0 w-full max-w-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold text-white tracking-wider">
@@ -385,13 +553,17 @@ export default function ContactsList() {
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                <Button 
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  onClick={() => handleEditContact(selectedContact)}
+                >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Contact
                 </Button>
                 <Button
                   variant="outline"
                   className="border-neutral-700 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 bg-transparent"
+                  onClick={() => handleViewHistory(selectedContact)}
                 >
                   View History
                 </Button>
@@ -404,6 +576,353 @@ export default function ContactsList() {
                   Delete
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Contact Modal */}
+      {editModalOpen && editingContact && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setEditModalOpen(false)
+            setEditingContact(null)
+            setEditFormData({
+              firstName: "",
+              lastName: "",
+              email: "",
+              phone: ""
+            })
+            setEditErrors({})
+            setEditSuccessMessage("")
+            setEditApiErrors("")
+          }}
+        >
+          <Card 
+            className="bg-neutral-900 border-neutral-700/0 w-full max-w-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold text-white tracking-wider">
+                  EDIT CONTACT
+                </CardTitle>
+                <p className="text-sm text-neutral-400 font-mono">ID: {editingContact.id}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setEditModalOpen(false)
+                  setEditingContact(null)
+                  setEditFormData({
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    phone: ""
+                  })
+                  setEditErrors({})
+                  setEditSuccessMessage("")
+                  setEditApiErrors("")
+                }}
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                {/* Success Message */}
+                {editSuccessMessage && (
+                  <div className="p-4 bg-green-500/20 border border-green-500 rounded">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <div>
+                        <p className="text-sm text-green-500 font-medium">SUCCESS!</p>
+                        <p className="text-xs text-neutral-400">{editSuccessMessage}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* API Error Message */}
+                {editApiErrors && (
+                  <div className="p-4 bg-red-500/20 border border-red-500 rounded">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-500" />
+                      <div>
+                        <p className="text-sm text-red-500 font-medium">ERROR</p>
+                        <p className="text-xs text-neutral-400">{editApiErrors}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-firstName" className="text-xs text-neutral-400 tracking-wider">
+                      FIRST NAME*
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                      <Input
+                        id="edit-firstName"
+                        value={editFormData.firstName}
+                        onChange={(e) => handleEditInputChange("firstName", e.target.value)}
+                        className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none " ${
+                          editErrors.firstName ? "border-red-500" : ""
+                        }`}
+                        placeholder="Enter first name"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    {editErrors.firstName && (
+                      <p className="text-xs text-red-500">{editErrors.firstName}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-lastName" className="text-xs text-neutral-400 tracking-wider">
+                      LAST NAME*
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                      <Input
+                        id="edit-lastName"
+                        value={editFormData.lastName}
+                        onChange={(e) => handleEditInputChange("lastName", e.target.value)}
+                        className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none " ${
+                          editErrors.lastName ? "border-red-500" : ""
+                        }`}
+                        placeholder="Enter last name"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    {editErrors.lastName && (
+                      <p className="text-xs text-red-500">{editErrors.lastName}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email" className="text-xs text-neutral-400 tracking-wider">
+                    EMAIL ADDRESS*
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <Input
+                      id="edit-email"
+                      value={editFormData.email}
+                      onChange={(e) => handleEditInputChange("email", e.target.value)}
+                      className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none " ${
+                        editErrors.email ? "border-red-500" : ""
+                      }`}
+                      placeholder="Enter email address"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  {editErrors.email && (
+                    <p className="text-xs text-red-500">{editErrors.email}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone" className="text-xs text-neutral-400 tracking-wider">
+                    PHONE NUMBER*
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <Input
+                      id="edit-phone"
+                      value={editFormData.phone}
+                      onChange={(e) => handleEditInputChange("phone", e.target.value)}
+                      className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none " ${
+                        editErrors.phone ? "border-red-500" : ""
+                      }`}
+                      placeholder="Enter phone number"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  {editErrors.phone && (
+                    <p className="text-xs text-red-500">{editErrors.phone}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    type="submit" 
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Update Contact
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setEditModalOpen(false)
+                      setEditingContact(null)
+                      setEditFormData({
+                        firstName: "",
+                        lastName: "",
+                        email: "",
+                        phone: ""
+                      })
+                      setEditErrors({})
+                      setEditSuccessMessage("")
+                      setEditApiErrors("")
+                    }}
+                    className="border-neutral-700 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 bg-transparent"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Contact History Modal */}
+      {historyModalOpen && selectedContact && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setHistoryModalOpen(false)
+            setContactHistory([])
+            setHistoryError("")
+          }}
+        >
+          <Card 
+            className="bg-neutral-900 border-neutral-700/0 w-full max-w-4xl max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold text-white tracking-wider">
+                  CONTACT HISTORY
+                </CardTitle>
+                <p className="text-sm text-neutral-400 font-mono">
+                  {selectedContact.first_name} {selectedContact.last_name} (ID: {selectedContact.id})
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setHistoryModalOpen(false)
+                  setContactHistory([])
+                  setHistoryError("")
+                }}
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8"
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </CardHeader>
+            <CardContent className="overflow-y-auto max-h-[60vh]">
+              {historyLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                    <span className="text-white">Loading history...</span>
+                  </div>
+                </div>
+              ) : historyError ? (
+                <div className="p-4 bg-red-500/20 border border-red-500 rounded">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-500" />
+                    <div>
+                      <p className="text-sm text-red-500 font-medium">ERROR</p>
+                      <p className="text-xs text-neutral-400">{historyError}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : contactHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-neutral-400">No history found for this contact</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {contactHistory.map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className="border border-neutral-700 rounded p-4 hover:border-orange-500/50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1">
+                          {/* <div className="flex items-center justify-center w-8 h-8 bg-neutral-800 rounded-full">
+                            {entry.action === 'created' ? (
+                              <Plus className="w-4 h-4" />
+                            ) : entry.action === 'updated' ? (
+                              <Edit className="w-4 h-4" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </div> */}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={
+                                entry.action === 'created' ? 'bg-white/20 text-white' :
+                                entry.action === 'updated' ? 'bg-orange-500/20 text-orange-500' :
+                                'bg-red-500/20 text-red-500'
+                              }>
+                                {entry.action.toUpperCase()}
+                              </Badge>
+                            </div>
+                            
+                            {entry.action === "created" ? (
+                              <p className="text-sm text-neutral-300">Contact was created in the system</p>
+                            ) : entry.action === "updated" ? (
+                              <div className="text-sm text-neutral-300">
+                                <p className="mb-1">Field <span className="text-orange-500 font-mono">{entry.field}</span> was updated</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                  <div>
+                                    <span className="text-neutral-400">Old value:</span>
+                                    <span className="text-red-400 font-mono ml-2">{entry.old_value}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-neutral-400">New value:</span>
+                                    <span className="text-green-400 font-mono ml-2">{entry.new_value}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-neutral-300">Contact was deleted from the system</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-right text-xs text-neutral-400 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3 h-3" />
+                            <span className="font-mono">{new Date(entry.created_at).toLocaleDateString('en-US', {
+                              month: '2-digit',
+                              day: '2-digit',
+                              year: 'numeric'
+                            })} {new Date(entry.created_at).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true
+                            })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
