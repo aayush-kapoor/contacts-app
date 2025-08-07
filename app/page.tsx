@@ -60,7 +60,18 @@ export default function ContactsApp() {
     
     // Refresh every 30 seconds
     const interval = setInterval(fetchLatestUpdate, 30000)
-    return () => clearInterval(interval)
+    
+    // Listen for navigation events from child components
+    const handleNavigateToSection = (event: CustomEvent) => {
+      setActiveSection(event.detail)
+    }
+    
+    window.addEventListener('navigateToSection', handleNavigateToSection as EventListener)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('navigateToSection', handleNavigateToSection as EventListener)
+    }
   }, [])
 
   return (

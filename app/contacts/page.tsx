@@ -288,7 +288,14 @@ export default function ContactsList() {
           <p className="text-sm text-neutral-400">Manage your contact information</p>
         </div>
         <div className="flex gap-2">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button 
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+            onClick={() => {
+              // Navigate to add contact form using sidebar navigation
+              const addContactEvent = new CustomEvent('navigateToSection', { detail: 'add' })
+              window.dispatchEvent(addContactEvent)
+            }}
+          >
             <User className="w-4 h-4 mr-2" />
             Add Contact
           </Button>
