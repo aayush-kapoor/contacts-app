@@ -28,6 +28,7 @@ Route::prefix('contacts')->group(function () {
     Route::get('/{contact}', [ContactController::class, 'show']);
     Route::put('/{contact}', [ContactController::class, 'update']);
     Route::delete('/{contact}', [ContactController::class, 'destroy']);
+    Route::get('/{contact}/history', [ContactHistoryController::class, 'contactHistory']);
 });
 
 // Contact History routes
