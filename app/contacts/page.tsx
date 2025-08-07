@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2 } from 'lucide-react'
+import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2, X } from 'lucide-react'
 
 interface Contact {
   id: number
@@ -167,7 +167,7 @@ export default function ContactsList() {
             placeholder="Search contacts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)]"
+            className="pl-10 bg-neutral-900 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none hover:bg-neutral-800 focus-visible:bg-neutral-800"
           />
         </div>
 {/* 
@@ -322,7 +322,7 @@ export default function ContactsList() {
       {/* Contact Detail Modal */}
       {selectedContact && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="bg-neutral-900 border-neutral-700 w-full max-w-2xl">
+          <Card className="bg-neutral-900 border-neutral-700/0 w-full max-w-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold text-white tracking-wider">
@@ -332,10 +332,11 @@ export default function ContactsList() {
               </div>
               <Button
                 variant="ghost"
+                size="icon"
                 onClick={() => setSelectedContact(null)}
-                className="text-neutral-400 hover:text-white"
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8"
               >
-                ✕
+                <X className="w-3 h-3" />
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -390,13 +391,13 @@ export default function ContactsList() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
+                  className="border-neutral-700 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-300 bg-transparent"
                 >
                   View History
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-red-700 text-red-400 hover:bg-red-800 hover:text-red-300 bg-transparent"
+                  className="border-red-700 text-red-400 hover:bg-red-700 hover:text-red-300 bg-transparent"
                   onClick={() => handleDeleteContact(selectedContact.id)}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />

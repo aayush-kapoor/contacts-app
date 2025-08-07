@@ -55,6 +55,8 @@ export default function ContactForm() {
     }
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required"
+    } else if (!/^\d{8,10}$/.test(formData.phone.replace(/[\s\-\(\)\+]/g, ''))) {
+      newErrors.phone = "Phone number must be 8-10 digits"
     }
 
     setErrors(newErrors)
@@ -179,13 +181,13 @@ export default function ContactForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-xs text-neutral-400 tracking-wider">
-                    FIRST NAME *
+                    FIRST NAME*
                   </Label>
                   <Input
                     id="firstName"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
+                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none  ${
                       errors.firstName ? "border-red-500" : ""
                     }`}
                     placeholder="Enter first name"
@@ -198,13 +200,13 @@ export default function ContactForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="lastName" className="text-xs text-neutral-400 tracking-wider">
-                    LAST NAME *
+                    LAST NAME*
                   </Label>
                   <Input
                     id="lastName"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
+                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none  ${
                       errors.lastName ? "border-red-500" : ""
                     }`}
                     placeholder="Enter last name"
@@ -218,7 +220,7 @@ export default function ContactForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs text-neutral-400 tracking-wider">
-                  EMAIL ADDRESS *
+                  EMAIL ADDRESS*
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -227,7 +229,7 @@ export default function ContactForm() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
+                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none  ${
                       errors.email ? "border-red-500" : ""
                     }`}
                     placeholder="Enter email address"
@@ -241,7 +243,7 @@ export default function ContactForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-xs text-neutral-400 tracking-wider">
-                  PHONE NUMBER *
+                  PHONE NUMBER*
                 </Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -249,7 +251,7 @@ export default function ContactForm() {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)]" ${
+                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/0 focus-visible:ring-offset-0 focus-visible:outline-none " ${
                       errors.phone ? "border-red-500" : ""
                     }`}
                     placeholder="Enter phone number"
