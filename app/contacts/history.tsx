@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, History, User, Edit, Plus, Trash2, Clock, AlertCircle, Loader2 } from 'lucide-react'
+import { Search, History, User, Edit, Plus, Trash2, Clock, AlertCircle, Loader2, X } from 'lucide-react'
 
 interface ContactHistory {
   id: number
@@ -173,7 +173,7 @@ export default function ContactHistory() {
                             </div>
                             <div>
                               <span className="text-neutral-400">New value:</span>
-                              <span className="text-white font-mono ml-2">{entry.new_value}</span>
+                              <span className="text-green-400 font-mono ml-2">{entry.new_value}</span>
                             </div>
                           </div>
                         </div>
@@ -215,9 +215,15 @@ export default function ContactHistory() {
       </Card>
 
       {/* History Detail Modal */}
-      {selectedHistory && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="bg-neutral-900 border-neutral-700 w-full max-w-2xl">
+              {selectedHistory && (
+          <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setSelectedHistory(null)}
+          >
+          <Card 
+            className="bg-neutral-900 border-neutral-700/0 w-full max-w-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold text-white tracking-wider">CHANGE DETAILS</CardTitle>
@@ -225,10 +231,11 @@ export default function ContactHistory() {
               </div>
               <Button
                 variant="ghost"
+                size="icon"
                 onClick={() => setSelectedHistory(null)}
-                className="text-neutral-400 hover:text-white"
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 w-8"
               >
-                ✕
+                <X className="w-3 h-3" />
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -279,7 +286,7 @@ export default function ContactHistory() {
                     </div>
                     <div>
                       <p className="text-xs text-neutral-400 tracking-wider mb-1">NEW VALUE</p>
-                      <p className="text-sm text-white font-mono bg-neutral-800 p-2 rounded">
+                      <p className="text-sm text-green-400 font-mono bg-neutral-800 p-2 rounded">
                         {selectedHistory.new_value}
                       </p>
                     </div>
