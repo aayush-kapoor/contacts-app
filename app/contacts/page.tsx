@@ -147,21 +147,22 @@ export default function ContactsList() {
       )}
 
       {/* Search and Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <Card className="lg:col-span-1 bg-neutral-900 border-neutral-700">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+        {/* <Card className="lg:col-span-1 bg-neutral-900/0 border-neutral-700/0">
           <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <Input
-                placeholder="Search contacts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400"
-              />
-            </div>
+            
           </CardContent>
-        </Card>
-
+        </Card> */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <Input
+            placeholder="Search contacts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)]"
+          />
+        </div>
+{/* 
         <Card className="bg-neutral-900 border-neutral-700">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -198,13 +199,15 @@ export default function ContactsList() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Contacts Table */}
-      <Card className="bg-neutral-900 border-neutral-700">
+      <Card className="bg-neutral-900 border-neutral-700/0">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">CONTACT REGISTRY</CardTitle>
+          <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+            ALL CONTACTS ({stats.total_contacts})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

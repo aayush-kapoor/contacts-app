@@ -167,7 +167,7 @@ export default function ContactForm() {
 
       {/* Form */}
       <div className="max-w-2xl">
-        <Card className="bg-neutral-900 border-neutral-700">
+        <Card className="bg-neutral-900 border-neutral-700/0">
           <CardHeader>
             <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider flex items-center gap-2">
               <User className="w-5 h-5" />
@@ -185,7 +185,7 @@ export default function ContactForm() {
                     id="firstName"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    className={`bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 ${
+                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
                       errors.firstName ? "border-red-500" : ""
                     }`}
                     placeholder="Enter first name"
@@ -204,7 +204,7 @@ export default function ContactForm() {
                     id="lastName"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    className={`bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 ${
+                    className={`bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
                       errors.lastName ? "border-red-500" : ""
                     }`}
                     placeholder="Enter last name"
@@ -227,7 +227,7 @@ export default function ContactForm() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 ${
+                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)] ${
                       errors.email ? "border-red-500" : ""
                     }`}
                     placeholder="Enter email address"
@@ -249,7 +249,7 @@ export default function ContactForm() {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className={`pl-10 bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 ${
+                    className={`pl-10 bg-neutral-800 border-neutral-600 border-neutral-700/0 bg-neutral-800 border-0 text-white placeholder-neutral-400 focus-visible:ring-1 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0 focus-visible:outline-none focus-visible:shadow-[0_0_0_1px_rgba(249,115,22,0.2)]" ${
                       errors.phone ? "border-red-500" : ""
                     }`}
                     placeholder="Enter phone number"

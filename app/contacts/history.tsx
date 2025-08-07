@@ -134,7 +134,7 @@ export default function ContactHistory() {
       )}
 
       {/* History Timeline */}
-      <Card className="bg-neutral-900 border-neutral-700">
+      <Card className="bg-neutral-900 border-neutral-700/0">
         <CardHeader>
           <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">CHANGE TIMELINE</CardTitle>
         </CardHeader>
@@ -196,10 +196,10 @@ export default function ContactHistory() {
                           hour12: true
                         })}</span>
                       </div>
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <User className="w-3 h-3" />
                       <span className="font-mono">{entry.user_id}</span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
