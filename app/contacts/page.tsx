@@ -79,10 +79,18 @@ export default function ContactsList() {
   }, [])
 
   const filteredContacts = contacts.filter(
-    (contact) =>
-      contact.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    (contact) => {
+      const fullName = `${contact.first_name} ${contact.last_name}`.toLowerCase()
+      const searchLower = searchTerm.toLowerCase()
+      
+      return (
+        contact.first_name.toLowerCase().includes(searchLower) ||
+        contact.last_name.toLowerCase().includes(searchLower) ||
+        fullName.includes(searchLower) ||
+        contact.email.toLowerCase().includes(searchLower) ||
+        contact.phone.toLowerCase().includes(searchLower)
+      )
+    }
   )
 
   const handleDeleteContact = async (contactId: number) => {
@@ -211,15 +219,15 @@ export default function ContactsList() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
               <thead>
                 <tr className="border-b border-neutral-700">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">NAME</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">EMAIL</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">PHONE</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">CREATED</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">UPDATED</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider">ACTIONS</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-48">NAME</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-64">EMAIL</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-40">PHONE</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-36">CREATED</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-36">UPDATED</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-neutral-400 tracking-wider w-24">ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,13 +241,13 @@ export default function ContactsList() {
                   >
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-white">
                             {contact.first_name[0]}{contact.last_name[0]}
                           </span>
                         </div>
-                        <div>
-                          <div className="text-sm text-white font-medium">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-white font-medium truncate">
                             {contact.first_name} {contact.last_name}
                           </div>
                         </div>
@@ -247,17 +255,17 @@ export default function ContactsList() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <Mail className="w-3 h-3 text-neutral-400" />
-                        <span className="text-sm text-neutral-300 font-mono">{contact.email}</span>
+                        <Mail className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                        <span className="text-xs text-neutral-300 font-mono truncate">{contact.email}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <Phone className="w-3 h-3 text-neutral-400" />
-                        <span className="text-sm text-neutral-300 font-mono">{contact.phone}</span>
+                        <Phone className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                        <span className="text-xs text-neutral-300 font-mono truncate">{contact.phone}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">
+                    <td className="py-3 px-4 text-xs text-neutral-300 font-mono truncate">
                       {new Date(contact.created_at).toLocaleDateString('en-US', {
                         month: '2-digit',
                         day: '2-digit',
@@ -268,7 +276,7 @@ export default function ContactsList() {
                         hour12: true
                       })}
                     </td>
-                    <td className="py-3 px-4 text-sm text-neutral-300 font-mono">
+                    <td className="py-3 px-4 text-xs text-neutral-300 font-mono truncate">
                       {new Date(contact.updated_at).toLocaleDateString('en-US', {
                         month: '2-digit',
                         day: '2-digit',
@@ -280,23 +288,20 @@ export default function ContactsList() {
                       })}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
-                          <Edit className="w-4 h-4" />
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-300/0 h-8 w-8">
+                          <Edit className="w-3 h-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-neutral-400 hover:text-red-500"
+                          className="text-neutral-400 hover:text-red-800 hover:bg-neutral-300/0 h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleDeleteContact(contact.id)
                           }}
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
-                          <MoreHorizontal className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
                     </td>
