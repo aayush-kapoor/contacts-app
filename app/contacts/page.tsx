@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Search, Edit, Trash2, Mail, Phone, User, MoreHorizontal, AlertCircle, Loader2, X, CheckCircle, Clock, Plus } from 'lucide-react'
+import { API_BASE_URL } from '@/config/api'
 
 interface Contact {
   id: number
@@ -61,7 +62,7 @@ export default function ContactsList() {
   const fetchContacts = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8000/api/contacts')
+      const response = await fetch(`${API_BASE_URL}/api/contacts`)
       const data: ApiResponse = await response.json()
       
       if (data.success) {
@@ -79,7 +80,7 @@ export default function ContactsList() {
   // Fetch stats from API
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/contacts/stats')
+      const response = await fetch(`${API_BASE_URL}/api/contacts/stats`)
       const data = await response.json()
       
       if (data.success) {
@@ -112,7 +113,7 @@ export default function ContactsList() {
 
   const handleDeleteContact = async (contactId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/contacts/${contactId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${contactId}`, {
         method: 'DELETE',
       })
       
@@ -135,7 +136,7 @@ export default function ContactsList() {
     setHistoryError("")
     
     try {
-      const response = await fetch(`http://localhost:8000/api/contacts/${contact.id}/history`)
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${contact.id}/history`)
       const data = await response.json()
       
       if (data.success) {
@@ -214,7 +215,7 @@ export default function ContactsList() {
     setEditSuccessMessage("")
     
     try {
-      const response = await fetch(`http://localhost:8000/api/contacts/${editingContact.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${editingContact.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

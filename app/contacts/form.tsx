@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { User, Mail, Phone, Save, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { API_BASE_URL } from '@/config/api'
 
 interface FormErrors {
   firstName?: string
@@ -75,7 +76,7 @@ export default function ContactForm() {
     setSuccessMessage("")
     
     try {
-      const response = await fetch('http://localhost:8000/api/contacts', {
+      const response = await fetch(`${API_BASE_URL}/api/contacts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

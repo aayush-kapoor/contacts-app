@@ -123,7 +123,7 @@ Thumbs.db
 
 # Laravel storage and cache
 backend/storage/
-backend/bootstrap/cache/
+backend/bootstrap/cache/*.php
 
 # Keep .gitignore files in storage directories
 !backend/storage/app/.gitignore

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, History, User, Edit, Plus, Trash2, Clock, AlertCircle, Loader2, X } from 'lucide-react'
+import { API_BASE_URL } from '@/config/api'
 
 interface ContactHistory {
   id: number
@@ -45,7 +46,7 @@ export default function ContactHistory() {
   const fetchHistory = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8000/api/contact-histories')
+      const response = await fetch(`${API_BASE_URL}/api/contact-histories`)
       const data: ApiResponse = await response.json()
       
       if (data.success) {

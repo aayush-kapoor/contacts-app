@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ChevronRight, Users, Plus, Search, Edit, Trash2, History, Clock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { API_BASE_URL } from '@/config/api'
 import { Button } from "@/components/ui/button"
 import ContactsList from "./contacts/page"
 import ContactForm from "./contacts/form"
@@ -25,7 +26,7 @@ export default function ContactsApp() {
   // Fetch the latest history entry
   const fetchLatestUpdate = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/contact-histories?per_page=1')
+      const response = await fetch(`${API_BASE_URL}/api/contact-histories?per_page=1`)
       const data = await response.json()
       
       if (data.success && data.data.length > 0) {
