@@ -2,14 +2,14 @@
 
 Hello KnotAPI team!
 
-## 🚀 Features
+## Features
 
 - **Contact Management**: Create, read, update, and delete contacts
 - **Search Functionality**: Search contacts by name or email
 - **Activity History**: Track all changes made to contacts
 - **Real-time Updates**: Instant feedback on all operations
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before setting up this project, ensure you have the following installed:
 
@@ -20,7 +20,7 @@ Before setting up this project, ensure you have the following installed:
 - **SQLite**: For database (default setup)
 
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Setup Instructions
 
@@ -145,7 +145,7 @@ pnpm dev
 ```
 The frontend will be available at http://localhost:3000
 
-## 🚀 Quick Start (After Initial Setup)
+## Quick Start (After Initial Setup)
 
 Once you've completed the setup above, for future runs you only need to start the servers:
 
@@ -161,7 +161,7 @@ pnpm dev
 ```
 
 
-## 🔌 API Endpoints
+## API Endpoints
 
 The backend provides the following REST API endpoints (all require `knotapi: 012345` header):
 
@@ -180,7 +180,29 @@ The backend provides the following REST API endpoints (all require `knotapi: 012
 ### Testing
 - `GET /api/test` - Test API connectivity
 
-## 🧪 API Testing Examples
+
+## App Screenshots
+
+### Home
+![Home](public/app_screenshots/home.png)
+
+### Add Contact
+![Add Contact](public/app_screenshots/add_contact.png)
+
+### Contact Detail
+![Contact Detail](public/app_screenshots/contact_detail.png)
+
+### Contact Edit
+![Contact Edit](public/app_screenshots/contact_edit.png)
+
+### Change Details
+![Change Details](public/app_screenshots/change_details.png)
+
+### Edit History
+![Edit History](public/app_screenshots/edit_history.png)
+
+
+## API Testing Examples
 
 Use these curl commands to test the API after starting the backend server:
 
@@ -279,14 +301,14 @@ curl -H "knotapi: 012345" \
      http://localhost:8000/api/contact-histories
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
 **Frontend (.env.local):**
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_API_KEY=012345
+NEXT_PUBLIC_API_KEY=012345 
 ```
 
 **Backend (.env):**
@@ -305,7 +327,7 @@ All API endpoints require the `knotapi` header with the value `012345`. This is 
 - Frontend: `config/api.ts`
 - Backend: `app/Http/Middleware/ApiKeyMiddleware.php`
 
-## 🗄️ Database Schema
+## Database Schema
 
 ### Contacts Table
 - `id` - Primary key
@@ -325,7 +347,7 @@ All API endpoints require the `knotapi` header with the value `012345`. This is 
 - `user_id` - User who performed the action
 - `created_at` - Action timestamp
 
-## 🛠️ Development
+## Development
 
 ### Frontend Development
 ```bash
@@ -354,7 +376,7 @@ php artisan test
 php artisan cache:clear
 ```
 
-## 📝 Important Files for Deployment
+## Important Files for Deployment
 
 Ensure these files are included when deploying or sharing the project:
 
