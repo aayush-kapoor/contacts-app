@@ -20,8 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Contact routes
-Route::prefix('contacts')->group(function () {
+// Contact routes - Protected by API key
+Route::middleware('api.key')->prefix('contacts')->group(function () {
     Route::get('/', [ContactController::class, 'index']);
     Route::post('/', [ContactController::class, 'store']);
     Route::get('/stats', [ContactController::class, 'stats']);
@@ -31,8 +31,8 @@ Route::prefix('contacts')->group(function () {
     Route::get('/{contact}/history', [ContactHistoryController::class, 'contactHistory']);
 });
 
-// Contact History routes
-Route::prefix('contact-histories')->group(function () {
+// Contact History routes - Protected by API key
+Route::middleware('api.key')->prefix('contact-histories')->group(function () {
     Route::get('/', [ContactHistoryController::class, 'index']);
     Route::get('/actions', [ContactHistoryController::class, 'actions']);
     Route::get('/stats', [ContactHistoryController::class, 'stats']);
@@ -40,6 +40,7 @@ Route::prefix('contact-histories')->group(function () {
     Route::get('/contact/{contact}', [ContactHistoryController::class, 'contactHistory']);
 }); 
 
-Route::get('/test', function() {
+// Test route - Protected by API key
+Route::middleware('api.key')->get('/test', function() {
     return response()->json(['message' => 'API is working']);
 });

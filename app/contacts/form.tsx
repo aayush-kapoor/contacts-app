@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { User, Mail, Phone, Save, X, CheckCircle, AlertCircle } from 'lucide-react'
-import { API_BASE_URL } from '@/config/api'
+import { API_BASE_URL, getApiHeaders } from '@/config/api'
 
 interface FormErrors {
   firstName?: string
@@ -78,9 +78,7 @@ export default function ContactForm() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/contacts`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getApiHeaders(),
         body: JSON.stringify({
           first_name: formData.firstName,
           last_name: formData.lastName,
