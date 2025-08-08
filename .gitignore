@@ -220,5 +220,8 @@ backend/.phpunit.cache/
 !pnpm-lock.yaml
 !components.json
 
+# Keep setup files
+!README.md
+
 # Keep .gitignore
 !.gitignore
