@@ -171,7 +171,6 @@ The backend provides the following REST API endpoints (all require `knotapi: 012
 - `GET /api/contacts/{id}` - Get specific contact with history
 - `PUT /api/contacts/{id}` - Update contact
 - `DELETE /api/contacts/{id}` - Delete contact
-- `GET /api/contacts/stats` - Get contact statistics
 
 ### Contact History
 - `GET /api/contact-histories` - List all contact's edit history
